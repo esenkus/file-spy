@@ -21,7 +21,8 @@ public:
 private:
     std::string path;
 
-    void read_dir_recursive(const std::string &directory);
+    // TODO: make async, change return to structure that has file path and fileSize?
+    std::vector<std::string> read_dir_recursive(const std::string &directory);
 };
 
 

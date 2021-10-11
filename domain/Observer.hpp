@@ -1,6 +1,4 @@
-#ifndef FILE_SPY_OBSERVER_HPP
-#define FILE_SPY_OBSERVER_HPP
-
+#pragma once
 
 #include <string>
 
@@ -19,11 +17,10 @@ public:
     void stop();
 
 private:
-    std::string path;
 
-    // TODO: make async, change return to structure that has file path and fileSize?
+    // TODO: make async, change return to map of filename and modification date
     std::vector<std::string> read_dir_recursive(const std::string &directory);
+
+private:
+    std::string path;
 };
-
-
-#endif //FILE_SPY_OBSERVER_HPP

@@ -30,5 +30,5 @@ private:
 private:
     std::string path;
     bool is_running;
-    std::unordered_map<std::string, long> observed_files;
+    std::unordered_map<std::string, long> old_observed_files;
 };

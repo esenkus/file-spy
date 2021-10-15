@@ -26,17 +26,17 @@ void Observer::start() {
         std::unordered_map<std::string, long> changed_files = read_dir_recursive(path);
         if (first_run) {
             LOG::logger.println(Logger::Level::INFO, "Marking files as observed...");
-            observed_files = changed_files;
+            old_observed_files = changed_files;
             first_run = false;
             LOG::logger.println(Logger::Level::INFO, "Observing for file changes...");
-            LOG::logger.println(Logger::Level::VERBOSE, "Files found: " + std::to_string(observed_files.size()));
+            LOG::logger.println(Logger::Level::VERBOSE, "Files found: " + std::to_string(old_observed_files.size()));
             continue;
         }
         std::unordered_map<std::string, Observer::Status> changes = check_for_changes(changed_files);
         for (auto &item: changes) {
             LOG::logger.println(Logger::Level::INFO, get_string_from_enum(item.second) + " -> " + item.first);
         }
-        observed_files = changed_files;
+        old_observed_files = changed_files;
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
         LOG::logger.println(Logger::Level::VERBOSE, "Loop finished in (ms): " + std::to_string(duration));
@@ -93,19 +93,20 @@ std::unordered_map<std::string, long> Observer::read_dir_recursive(const std::st
 std::unordered_map<std::string, Observer::Status>
 Observer::check_for_changes(std::unordered_map<std::string, long> &new_observed_files) {
     std::unordered_map<std::string, Status> result;
-    for (const auto &observed_file: observed_files) {
-        if (!new_observed_files.count(observed_file.first)) {
-            result.insert({observed_file.first, Status::DELETED});
+    for (const auto &new_observed_file: new_observed_files) {
+        if (!old_observed_files.count(new_observed_file.first)) {
+            result.insert({new_observed_file.first, Status::CREATED});
         } else {
-            auto &modify_date = new_observed_files[observed_file.first];
-            if (modify_date != observed_file.second) {
-                result.insert({observed_file.first, Status::MODIFIED});
+            auto item = old_observed_files.find(new_observed_file.first);
+            if (item->second != new_observed_file.second) {
+                result.insert({item->first, Status::MODIFIED});
             }
+            old_observed_files.erase(item);
         }
     }
-    for (const auto &changed_file: new_observed_files) {
-        if (!observed_files.count(changed_file.first)) {
-            result.insert({changed_file.first, Status::CREATED});
+    for (const auto &observed_file: old_observed_files) {
+        if (!new_observed_files.count(observed_file.first)) {
+            result.insert({observed_file.first, Status::DELETED});
         }
     }
     return result;

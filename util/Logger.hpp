@@ -6,8 +6,9 @@ class Logger {
 public:
     enum class Level {
         INFO = 1,
-        DEBUG = 2,
-        TRACE = 3
+        VERBOSE = 2,
+        DEBUG = 3,
+        TRACE = 4
     };
 
     static Logger &get_instance();

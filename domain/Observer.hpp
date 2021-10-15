@@ -2,13 +2,14 @@
 
 #include <string>
 #include <unordered_map>
+#include <chrono>
 
 class Observer {
 public:
     enum class Status {
-        Created,
-        Deleted,
-        Modified
+        CREATED = 0,
+        DELETED = 1,
+        MODIFIED = 2
     };
 
     explicit Observer(std::string path);
@@ -18,10 +19,16 @@ public:
     void stop();
 
 private:
-
     // TODO: make async
     std::unordered_map<std::string, long> read_dir_recursive(const std::string &directory);
 
+    std::unordered_map<std::string, Status>
+    check_for_changes(std::unordered_map<std::string, long> &new_observed_files);
+
+    static std::string get_string_from_enum(Status status);
+
 private:
     std::string path;
+    bool is_running;
+    std::unordered_map<std::string, long> observed_files;
 };

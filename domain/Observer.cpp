@@ -12,10 +12,10 @@ Observer::Observer(std::string path) : path(std::move(path)) {
 
 void Observer::start() {
     LOG::logger.println(Logger::Level::INFO, "starting observer in path " + path);
-    std::vector<std::string> result = read_dir_recursive(path);
+    std::unordered_map<std::string, long> result = read_dir_recursive(path);
     LOG::logger.println(Logger::Level::DEBUG, "result:");
-    for (const std::string &item: result) {
-        LOG::logger.println(Logger::Level::DEBUG, "  " + item);
+    for (auto &item: result) {
+        LOG::logger.println(Logger::Level::DEBUG, "  " + item.first + " - " + std::to_string(item.second));
     }
 }
 
@@ -23,10 +23,10 @@ void Observer::stop() {
     LOG::logger.println(Logger::Level::INFO, "stopping observer of path " + path);
 }
 
-std::vector<std::string> Observer::read_dir_recursive(const std::string &directory) {
+std::unordered_map<std::string, long> Observer::read_dir_recursive(const std::string &directory) {
     DIR *dir;
     struct dirent *ent;
-    std::vector<std::string> result;
+    std::unordered_map<std::string, long> result;
     struct stat file_stats{};
 
     LOG::logger.println(Logger::Level::TRACE, "Reading directory: " + directory);
@@ -40,18 +40,18 @@ std::vector<std::string> Observer::read_dir_recursive(const std::string &directo
             }
             //std::unordered_map
             std::string full_path = directory + "/" + filename; // NOLINT(performance-inefficient-string-concatenation)
+            long &last_modification_time = file_stats.st_mtimespec.tv_nsec;
             if (stat(full_path.c_str(), &file_stats) == 0) {
-                // TODO: add this to map
                 LOG::logger.println(Logger::Level::TRACE,
-                                    "File modification date: " + std::to_string(file_stats.st_mtimespec.tv_nsec));
+                                    "File modification date: " + std::to_string(last_modification_time));
             } else {
                 LOG::logger.println(Logger::Level::INFO, "stat() failed for this file " + filename);
             }
             if (ent->d_type != DT_DIR) {
-                result.push_back(full_path);
+                result.insert({full_path, last_modification_time});
             } else {
-                std::vector<std::string> inner = read_dir_recursive(full_path);
-                result.insert(result.end(), inner.begin(), inner.end());
+                std::unordered_map<std::string, long> inner = read_dir_recursive(full_path);
+                result.insert(inner.begin(), inner.end());
             }
         }
         closedir(dir);

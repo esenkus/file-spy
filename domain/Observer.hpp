@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 class Observer {
 public:
@@ -18,8 +19,8 @@ public:
 
 private:
 
-    // TODO: make async, change return to map of filename and modification date
-    std::vector<std::string> read_dir_recursive(const std::string &directory);
+    // TODO: make async
+    std::unordered_map<std::string, long> read_dir_recursive(const std::string &directory);
 
 private:
     std::string path;

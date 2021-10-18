@@ -13,44 +13,12 @@ Observer::Observer(std::string path) : path(std::move(path)) {
     is_running = false;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
-
-void Observer::start() {
-    LOG::logger.println(Logger::Level::INFO, "starting observer in path " + path);
-    is_running = true;
-    bool first_run = true;
-    while (is_running) {
-        LOG::logger.println(Logger::Level::VERBOSE, "Looping...");
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        std::unordered_map<std::string, long> changed_files = read_dir_recursive(path);
-        if (first_run) {
-            LOG::logger.println(Logger::Level::INFO, "Marking files as observed...");
-            old_observed_files = changed_files;
-            first_run = false;
-            LOG::logger.println(Logger::Level::INFO, "Observing for file changes...");
-            LOG::logger.println(Logger::Level::VERBOSE, "Files found: " + std::to_string(old_observed_files.size()));
-            continue;
-        }
-        std::unordered_map<std::string, Observer::Status> changes = check_for_changes(changed_files);
-        for (auto &item: changes) {
-            LOG::logger.println(Logger::Level::INFO, get_string_from_enum(item.second) + " -> " + item.first);
-        }
-        old_observed_files = changed_files;
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        LOG::logger.println(Logger::Level::VERBOSE, "Loop finished in (ms): " + std::to_string(duration));
-        std::this_thread::sleep_for(SLEEP_TIME);
-    }
-}
-
-#pragma clang diagnostic pop
-
 void Observer::stop() {
     LOG::logger.println(Logger::Level::INFO, "stopping observer of path " + path);
     is_running = false;
 }
 
+// TODO: this could probably use fancy multithreading for speed
 std::unordered_map<std::string, long> Observer::read_dir_recursive(const std::string &directory) {
     DIR *dir;
     struct dirent *ent;
@@ -123,4 +91,43 @@ std::string Observer::get_string_from_enum(Status status) {
         default:
             throw std::runtime_error("Status value is not implemented");
     }
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+#pragma ide diagnostic ignored "ConstantConditionsOC"
+
+void Observer::run() {
+    is_running = true;
+    bool first_run = true;
+    while (is_running) {
+        LOG::logger.println(Logger::Level::VERBOSE, "Looping...");
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        std::unordered_map<std::string, long> changed_files = read_dir_recursive(path);
+        if (first_run) {
+            LOG::logger.println(Logger::Level::INFO, "Marking files as observed...");
+            old_observed_files = changed_files;
+            first_run = false;
+            LOG::logger.println(Logger::Level::INFO, "Observing for file changes...");
+            LOG::logger.println(Logger::Level::VERBOSE, "Files found: " + std::to_string(old_observed_files.size()));
+            continue;
+        }
+        std::unordered_map<std::string, Observer::Status> changes = check_for_changes(changed_files);
+        for (auto &item: changes) {
+            LOG::logger.println(Logger::Level::INFO, get_string_from_enum(item.second) + " -> " + item.first);
+        }
+        old_observed_files = changed_files;
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        LOG::logger.println(Logger::Level::VERBOSE, "Loop finished in (ms): " + std::to_string(duration));
+        std::this_thread::sleep_for(SLEEP_TIME);
+    }
+}
+
+#pragma clang diagnostic pop
+
+void Observer::start() {
+    LOG::logger.println(Logger::Level::INFO, "starting observer in path " + path);
+    std::thread t1(&Observer::run, this);
+    t1.detach();
 }

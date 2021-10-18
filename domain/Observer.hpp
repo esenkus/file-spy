@@ -19,8 +19,9 @@ public:
     void stop();
 
 private:
-    // TODO: make async
     std::unordered_map<std::string, long> read_dir_recursive(const std::string &directory);
+
+    void run();
 
     std::unordered_map<std::string, Status>
     check_for_changes(std::unordered_map<std::string, long> &new_observed_files);

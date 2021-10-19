@@ -1,5 +1,5 @@
-#include <iostream>
 #include <thread>
+#include <future>
 #include "domain/Observer.hpp"
 #include "util/Logger.hpp"
 
@@ -9,7 +9,7 @@ int main() {
 
 //    Observer observer("/Users/eivydassenkus/Desktop/test");
     Observer observer("/Users/eivydassenkus/Documents/git/secure-dex");
-    observer.start();
+    observer.start(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(30 * 1000));
     observer.stop();
     return 0;

@@ -15,7 +15,7 @@ public:
 
     explicit Observer(std::string path);
 
-    void start();
+    void start(bool use_async_reader);
 
     void stop();
 
@@ -24,7 +24,11 @@ private:
 
     static std::unordered_map<std::string, long> read_dir(const std::string &directory);
 
-    void run();
+    static std::unordered_map<std::string, long> read_dir_threaded(const std::string &directory);
+
+    static std::unordered_map<std::string, long> thread_job(const std::string &directory);
+
+    void run(bool use_async_reader);
 
     std::unordered_map<std::string, Status>
     check_for_changes(std::unordered_map<std::string, long> &new_observed_files);

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <thread>
 #include <chrono>
+#include <future>
 
 static const std::chrono::milliseconds SLEEP_TIME = std::chrono::milliseconds(5 * 1000); // NOLINT(cert-err58-cpp)
 
@@ -113,13 +114,53 @@ std::unordered_map<std::string, long> Observer::read_dir(const std::string &dire
     return result;
 }
 
-void Observer::run() {
+std::unordered_map<std::string, long> Observer::thread_job(const std::string &directory) {
+    std::unordered_map<std::string, long> result;
+    struct Content content = read_dir_one_depth(directory);
+    result.insert(content.files.begin(), content.files.end());
+    auto &dirs = content.directories;
+    while (!dirs.empty()) {
+        struct Content inner_content = read_dir_one_depth(dirs.back());
+        dirs.pop_back();
+        dirs.insert(dirs.end(), inner_content.directories.begin(), inner_content.directories.end());
+        result.insert(inner_content.files.begin(), inner_content.files.end());
+    }
+    return result;
+}
+
+std::unordered_map<std::string, long> Observer::read_dir_threaded(const std::string &directory) {
+    std::unordered_map<std::string, long> result;
+    std::vector<std::future<std::unordered_map<std::string, long>>> workers;
+
+    struct Content content = read_dir_one_depth(directory);
+    result.insert(content.files.begin(), content.files.end());
+    auto &first_dirs = content.directories;
+
+    while (!first_dirs.empty()) {
+        workers.push_back(std::async(thread_job, first_dirs.back()));
+        first_dirs.pop_back();
+    }
+    LOG::logger.println(Logger::Level::DEBUG, "Created workers: " + std::to_string(workers.size()));
+    for (auto &worker: workers) {
+        auto thread_result = worker.get();
+        result.insert(thread_result.begin(), thread_result.end());
+    }
+    return result;
+}
+
+void Observer::run(bool use_async_reader) {
     is_running = true;
     bool first_run = true;
+    if (use_async_reader) {
+        LOG::logger.println(Logger::Level::VERBOSE, "Using async reader...");
+    } else {
+        LOG::logger.println(Logger::Level::VERBOSE, "Using sync reader...");
+    }
     while (is_running) {
         LOG::logger.println(Logger::Level::VERBOSE, "Looping...");
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        std::unordered_map<std::string, long> changed_files = read_dir(path);
+        std::unordered_map<std::string, long> changed_files =
+                use_async_reader ? read_dir_threaded(path) : read_dir(path);
         if (first_run) {
             LOG::logger.println(Logger::Level::INFO, "Marking files as observed...");
             old_observed_files = changed_files;
@@ -142,8 +183,8 @@ void Observer::run() {
 
 #pragma clang diagnostic pop
 
-void Observer::start() {
+void Observer::start(bool use_async_reader) {
     LOG::logger.println(Logger::Level::INFO, "starting observer in path " + path);
-    std::thread t1(&Observer::run, this);
+    std::thread t1(&Observer::run, this, use_async_reader);
     t1.detach();
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <chrono>
+#include "Content.cpp"
 
 class Observer {
 public:
@@ -19,7 +20,9 @@ public:
     void stop();
 
 private:
-    std::unordered_map<std::string, long> read_dir_recursive(const std::string &directory);
+    static Content read_dir_one_depth(const std::string &directory);
+
+    static std::unordered_map<std::string, long> read_dir(const std::string &directory);
 
     void run();
 

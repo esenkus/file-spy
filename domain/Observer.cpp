@@ -18,46 +18,6 @@ void Observer::stop() {
     is_running = false;
 }
 
-// TODO: this could probably use fancy multithreading for speed
-std::unordered_map<std::string, long> Observer::read_dir_recursive(const std::string &directory) {
-    DIR *dir;
-    struct dirent *ent;
-    std::unordered_map<std::string, long> result;
-    struct stat file_stats{};
-
-    LOG::logger.println(Logger::Level::TRACE, "Reading directory: " + directory);
-    if ((dir = opendir(directory.c_str())) != nullptr) {
-        while ((ent = readdir(dir)) != nullptr) {
-            std::string filename = ent->d_name;
-            LOG::logger.println(Logger::Level::TRACE, "Reading file: " + filename);
-            if (filename == "." || filename == "..") {
-                LOG::logger.println(Logger::Level::TRACE, "Skipping: " + filename);
-                continue;
-            }
-            //std::unordered_map
-            std::string full_path = directory + "/" + filename; // NOLINT(performance-inefficient-string-concatenation)
-            long &last_modification_time = file_stats.st_mtimespec.tv_nsec;
-            if (stat(full_path.c_str(), &file_stats) == 0) {
-                LOG::logger.println(Logger::Level::TRACE,
-                                    "File modification date: " + std::to_string(last_modification_time));
-            } else {
-                LOG::logger.println(Logger::Level::INFO, "stat() failed for this file " + filename);
-            }
-            if (ent->d_type != DT_DIR) {
-                result.insert({full_path, last_modification_time});
-            } else {
-                std::unordered_map<std::string, long> inner = read_dir_recursive(full_path);
-                result.insert(inner.begin(), inner.end());
-            }
-        }
-        closedir(dir);
-    } else {
-        /* could not open directory */
-        perror("FAILED");
-    }
-    return result;
-}
-
 std::unordered_map<std::string, Observer::Status>
 Observer::check_for_changes(std::unordered_map<std::string, long> &new_observed_files) {
     std::unordered_map<std::string, Status> result;
@@ -97,13 +57,69 @@ std::string Observer::get_string_from_enum(Status status) {
 #pragma ide diagnostic ignored "EndlessLoop"
 #pragma ide diagnostic ignored "ConstantConditionsOC"
 
+Content Observer::read_dir_one_depth(const std::string &directory) {
+    DIR *dir;
+    struct dirent *ent;
+    std::unordered_map<std::string, long> files;
+    std::vector<std::string> directories;
+    struct stat file_stats{};
+
+    LOG::logger.println(Logger::Level::TRACE, "Reading directory: " + directory);
+    if ((dir = opendir(directory.c_str())) != nullptr) {
+        while ((ent = readdir(dir)) != nullptr) {
+            std::string filename = ent->d_name;
+            LOG::logger.println(Logger::Level::TRACE, "Reading file: " + filename);
+            if (filename == "." || filename == "..") {
+                LOG::logger.println(Logger::Level::TRACE, "Skipping: " + filename);
+                continue;
+            }
+            std::string full_path = directory + "/" + filename; // NOLINT(performance-inefficient-string-concatenation)
+            long &last_modification_time = file_stats.st_mtimespec.tv_nsec;
+            if (stat(full_path.c_str(), &file_stats) == 0) {
+                LOG::logger.println(Logger::Level::TRACE,
+                                    "File modification date: " + std::to_string(last_modification_time));
+            } else {
+                LOG::logger.println(Logger::Level::INFO, "stat() failed for this file " + filename);
+            }
+            if (ent->d_type != DT_DIR) {
+                files.insert({full_path, last_modification_time});
+            } else {
+                directories.push_back(full_path);
+            }
+        }
+        closedir(dir);
+    } else {
+        /* could not open directory */
+        perror("FAILED");
+    }
+    struct Content content;
+    content.directories = directories;
+    content.files = files;
+    return content;
+}
+
+std::unordered_map<std::string, long> Observer::read_dir(const std::string &directory) {
+    std::unordered_map<std::string, long> result;
+
+    struct Content content = read_dir_one_depth(directory);
+    result.insert(content.files.begin(), content.files.end());
+    auto &dirs = content.directories;
+    while (!dirs.empty()) {
+        struct Content inner_content = read_dir_one_depth(dirs.back());
+        dirs.pop_back();
+        dirs.insert(dirs.end(), inner_content.directories.begin(), inner_content.directories.end());
+        result.insert(inner_content.files.begin(), inner_content.files.end());
+    }
+    return result;
+}
+
 void Observer::run() {
     is_running = true;
     bool first_run = true;
     while (is_running) {
         LOG::logger.println(Logger::Level::VERBOSE, "Looping...");
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        std::unordered_map<std::string, long> changed_files = read_dir_recursive(path);
+        std::unordered_map<std::string, long> changed_files = read_dir(path);
         if (first_run) {
             LOG::logger.println(Logger::Level::INFO, "Marking files as observed...");
             old_observed_files = changed_files;

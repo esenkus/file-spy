@@ -3,4 +3,8 @@ project(file_spy)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(file_spy main.cpp domain/Observer.cpp domain/Observer.hpp util/Logger.cpp util/Logger.hpp domain/Content.cpp)
+enable_testing()
+
+add_subdirectory(main)
+add_subdirectory(file-spy-test)
+add_subdirectory(file-spy-lib)

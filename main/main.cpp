@@ -1,7 +1,7 @@
 #include <thread>
 #include <future>
-#include "domain/Observer.hpp"
-#include "util/Logger.hpp"
+#include "Observer.hpp"
+#include "Logger.hpp"
 
 int main() {
     LOG::logger.set_level(Logger::Level::VERBOSE);

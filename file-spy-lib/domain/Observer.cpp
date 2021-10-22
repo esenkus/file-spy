@@ -3,7 +3,6 @@
 #include "../util/Logger.hpp"
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unordered_map>
 #include <thread>
 #include <chrono>
 #include <future>

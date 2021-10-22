@@ -1,34 +1,21 @@
 cmake_minimum_required(VERSION 3.10)
 
-include(GoogleTest)
+set(conan_packages
+        gtest/1.11.0
+        )
+set(conan_options
+        gtest:shared=False
+        )
 
-# Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
-if (result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
-if (result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif ()
+conan_cmake_run(REQUIRES ${conan_packages}
+        BASIC_SETUP CMAKE_TARGETS
+        BUILD missing
+        OPTIONS ${conan_options}
+        )
 
-# Prevent overriding the parent project's compiler/linker settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+file(GLOB_RECURSE TEST_SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+        )
 
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL)
-
-# Now simply link against gtest or gtest_main as needed. Eg
-add_executable(file-spy-test ObserverTest.cpp)
-target_link_libraries(file-spy-test file-spy-lib gmock_main)
-
-gtest_discover_tests(file-spy-test)
+add_executable(file-spy-test ${TEST_SOURCE})
+target_link_libraries(file-spy-test file-spy-lib CONAN_PKG::gtest)

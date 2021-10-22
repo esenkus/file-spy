@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <chrono>
-#include "Content.cpp"
+#include "Content.hpp"
 
 class Observer {
 public:

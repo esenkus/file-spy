@@ -1,6 +1,6 @@
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
-#include "domain/Observer.hpp"
+#include "Observer.hpp"
 
 using namespace testing;
 

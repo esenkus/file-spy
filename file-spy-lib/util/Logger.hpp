@@ -11,13 +11,13 @@ public:
         TRACE = 4
     };
 
-    static Logger &get_instance();
+    static Logger& get_instance();
 
-    Logger(Logger const &) = delete;
+    Logger(Logger const&) = delete;
 
-    void operator=(Logger const &) = delete;
+    void operator=(Logger const&) = delete;
 
-    void println(Level pLevel, const std::string &pMessage);
+    void println(Level pLevel, const std::string& pMessage);
 
     void set_level(Level pLevel);
 
@@ -29,5 +29,5 @@ private:
 };
 
 namespace LOG {
-    extern Logger &logger;
+    extern Logger& logger;
 }

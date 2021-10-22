@@ -1,5 +1,4 @@
 #include <thread>
-#include <future>
 #include "Observer.hpp"
 #include "Logger.hpp"
 

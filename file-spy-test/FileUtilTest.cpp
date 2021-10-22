@@ -15,9 +15,9 @@ TEST(FileUtilTest, check_for_changes_finds_delete) {
             {"com/File.txt",       1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
-    EXPECT_EQ(statuses.size(), 1);
-    EXPECT_TRUE(statuses.count("com/test/File.txt"));
-    EXPECT_EQ(Content::Status::DELETED, statuses.find("com/test/File.txt")->second);
+    ASSERT_EQ(statuses.size(), 1);
+    ASSERT_TRUE(statuses.count("com/test/File.txt"));
+    ASSERT_EQ(Content::Status::DELETED, statuses.find("com/test/File.txt")->second);
 }
 
 TEST(FileUtilTest, check_for_changes_finds_modified) {
@@ -34,9 +34,9 @@ TEST(FileUtilTest, check_for_changes_finds_modified) {
             {"com/File.txt",       1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
-    EXPECT_EQ(statuses.size(), 1);
-    EXPECT_TRUE(statuses.count("com/test/File3.txt"));
-    EXPECT_EQ(Content::Status::MODIFIED, statuses.find("com/test/File3.txt")->second);
+    ASSERT_EQ(statuses.size(), 1);
+    ASSERT_TRUE(statuses.count("com/test/File3.txt"));
+    ASSERT_EQ(Content::Status::MODIFIED, statuses.find("com/test/File3.txt")->second);
 }
 
 TEST(FileUtilTest, check_for_changes_finds_created) {
@@ -54,7 +54,7 @@ TEST(FileUtilTest, check_for_changes_finds_created) {
             {"com/test/File99.txt", 1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
-    EXPECT_EQ(statuses.size(), 1);
-    EXPECT_TRUE(statuses.count("com/test/File99.txt"));
-    EXPECT_EQ(Content::Status::CREATED, statuses.find("com/test/File99.txt")->second);
+    ASSERT_EQ(statuses.size(), 1);
+    ASSERT_TRUE(statuses.count("com/test/File99.txt"));
+    ASSERT_EQ(Content::Status::CREATED, statuses.find("com/test/File99.txt")->second);
 }

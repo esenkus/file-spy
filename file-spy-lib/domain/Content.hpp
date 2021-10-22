@@ -11,3 +11,6 @@ struct Content {
         MODIFIED = 2
     };
 };
+
+using StatusMap = std::unordered_map<std::string, Content::Status>;
+using ChangeMap = std::unordered_map<std::string, long>;

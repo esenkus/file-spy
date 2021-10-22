@@ -3,7 +3,6 @@
 #include <utility>
 #include <thread>
 #include <chrono>
-#include "FileUtil.hpp"
 #include "Logger.hpp"
 
 static const std::chrono::milliseconds SLEEP_TIME = std::chrono::milliseconds(5 * 1000); // NOLINT(cert-err58-cpp)
@@ -22,7 +21,8 @@ std::string get_string_from_enum(Content::Status status) {
     }
 }
 
-Observer::Observer(std::string path) : path(std::move(path)) {
+Observer::Observer(std::string path, void (* callback)(StatusMap&)) : path(std::move(path)),
+                                                                      callback(callback) {
     is_running = false;
 }
 
@@ -57,8 +57,10 @@ void Observer::run(bool use_async_reader) {
             LOG::logger.println(Logger::Level::VERBOSE, "Files found: " + std::to_string(old_observed_files.size()));
             continue;
         }
-        std::unordered_map<std::string, Content::Status> changes = file_util::check_for_changes(old_observed_files,
-                                                                                                changed_files);
+        StatusMap changes = file_util::check_for_changes(old_observed_files, changed_files);
+        if (!changes.empty()) {
+            callback(changes);
+        }
         for (auto& item: changes) {
             LOG::logger.println(Logger::Level::INFO, get_string_from_enum(item.second) + " -> " + item.first);
         }

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(conan_packages
         gtest/1.11.0
+        boost/1.76.0
         )
 set(conan_options
         gtest:shared=False
@@ -18,4 +19,4 @@ file(GLOB_RECURSE TEST_SOURCE
         )
 
 add_executable(file-spy-test ${TEST_SOURCE})
-target_link_libraries(file-spy-test file-spy-lib CONAN_PKG::gtest)
+target_link_libraries(file-spy-test file-spy-lib CONAN_PKG::gtest CONAN_PKG::boost)

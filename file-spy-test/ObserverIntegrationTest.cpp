@@ -1,7 +1,8 @@
-#include <thread>
-#include "boost/filesystem.hpp"
-#include "gtest/gtest.h"
 #include "Observer.hpp"
+#include "boost/filesystem.hpp"
+
+#include "gtest/gtest.h"
+#include <thread>
 
 void create_and_write_file(const std::string& path, const std::string& content) {
     std::ofstream outfile(path);
@@ -30,9 +31,7 @@ TEST(ObserverIntegrationTest, test_observer_working) {
     create_and_write_file(temporary_file1.string());
     create_and_write_file(temporary_file2.string());
 
-    void (* changes)(StatusMap&) = [](StatusMap& statusMap) {
-        result.insert(statusMap.begin(), statusMap.end());
-    };
+    void (*changes)(StatusMap&) = [](StatusMap& statusMap) { result.insert(statusMap.begin(), statusMap.end()); };
     Observer observer(temporary_dir.string(), changes);
     observer.start(false);
     std::this_thread::sleep_for(std::chrono::milliseconds(2 * 1000));

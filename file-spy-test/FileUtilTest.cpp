@@ -4,15 +4,15 @@
 
 TEST(FileUtilTest, check_for_changes_finds_delete) {
     ChangeMap original_files = {
-            {"com/test/File.txt",  1},
-            {"com/test/File2.txt", 1},
-            {"com/test/File3.txt", 1},
-            {"com/File.txt",       1},
+        {"com/test/File.txt", 1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 1},
+        {"com/File.txt", 1},
     };
     ChangeMap changed_files = {
-            {"com/test/File2.txt", 1},
-            {"com/test/File3.txt", 1},
-            {"com/File.txt",       1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 1},
+        {"com/File.txt", 1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
     ASSERT_EQ(statuses.size(), 1);
@@ -22,16 +22,16 @@ TEST(FileUtilTest, check_for_changes_finds_delete) {
 
 TEST(FileUtilTest, check_for_changes_finds_modified) {
     ChangeMap original_files = {
-            {"com/test/File.txt",  1},
-            {"com/test/File2.txt", 1},
-            {"com/test/File3.txt", 1},
-            {"com/File.txt",       1},
+        {"com/test/File.txt", 1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 1},
+        {"com/File.txt", 1},
     };
     ChangeMap changed_files = {
-            {"com/test/File.txt",  1},
-            {"com/test/File2.txt", 1},
-            {"com/test/File3.txt", 99},
-            {"com/File.txt",       1},
+        {"com/test/File.txt", 1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 99},
+        {"com/File.txt", 1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
     ASSERT_EQ(statuses.size(), 1);
@@ -41,17 +41,17 @@ TEST(FileUtilTest, check_for_changes_finds_modified) {
 
 TEST(FileUtilTest, check_for_changes_finds_created) {
     ChangeMap original_files = {
-            {"com/test/File.txt",  1},
-            {"com/test/File2.txt", 1},
-            {"com/test/File3.txt", 1},
-            {"com/File.txt",       1},
+        {"com/test/File.txt", 1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 1},
+        {"com/File.txt", 1},
     };
     ChangeMap changed_files = {
-            {"com/test/File.txt",   1},
-            {"com/test/File2.txt",  1},
-            {"com/test/File3.txt",  1},
-            {"com/File.txt",        1},
-            {"com/test/File99.txt", 1},
+        {"com/test/File.txt", 1},
+        {"com/test/File2.txt", 1},
+        {"com/test/File3.txt", 1},
+        {"com/File.txt", 1},
+        {"com/test/File99.txt", 1},
     };
     StatusMap statuses = file_util::check_for_changes(original_files, changed_files);
     ASSERT_EQ(statuses.size(), 1);

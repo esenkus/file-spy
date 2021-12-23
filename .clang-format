@@ -1,0 +1,27 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AllowAllConstructorInitializersOnNextLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentWidth: 4
+MaxEmptyLinesToKeep: 2
+BreakBeforeBraces: Attach
+Cpp11BracedListStyle: true
+SpaceBeforeCpp11BracedList: false
+IncludeBlocks: Regroup
+AllowShortFunctionsOnASingleLine: Empty
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+BinPackArguments: false
+PointerAlignment: Left
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortLoopsOnASingleLine: false
+BreakConstructorInitializers: BeforeComma # me prefer BeforeColon
+BreakInheritanceList: BeforeComma # me prefer BeforeColon
+ColumnLimit: 120 # nicer with 80
+SpaceBeforeCtorInitializerColon: false
+AllowShortEnumsOnASingleLine: false
+NamespaceIndentation: All
+FixNamespaceComments: false
+...

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Content.hpp"
+
 #include <string>
 #include <unordered_map>
-#include "Content.hpp"
 
 namespace file_util {
     Content read_dir_one_depth(const std::string& directory);

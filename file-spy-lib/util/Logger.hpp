@@ -3,7 +3,7 @@
 #include <string>
 
 class Logger {
-public:
+  public:
     enum class Level {
         OFF = 0,
         INFO = 1,
@@ -22,10 +22,10 @@ public:
 
     void set_level(Level pLevel);
 
-private:
+  private:
     Logger() = default;
 
-private:
+  private:
     Level level;
 };
 

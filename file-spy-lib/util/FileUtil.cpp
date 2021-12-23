@@ -1,13 +1,14 @@
 #include "FileUtil.hpp"
 
-#include <dirent.h>
-#include <sys/stat.h>
-#include <future>
 #include "Logger.hpp"
+
+#include <dirent.h>
+#include <future>
+#include <sys/stat.h>
 
 StatusMap file_util::check_for_changes(ChangeMap& old_observed_files, ChangeMap& new_observed_files) {
     StatusMap result;
-    for (const auto& new_observed_file: new_observed_files) {
+    for (const auto& new_observed_file : new_observed_files) {
         if (!old_observed_files.count(new_observed_file.first)) {
             result.insert({new_observed_file.first, Content::Status::CREATED});
         } else {
@@ -18,7 +19,7 @@ StatusMap file_util::check_for_changes(ChangeMap& old_observed_files, ChangeMap&
             old_observed_files.erase(item);
         }
     }
-    for (const auto& observed_file: old_observed_files) {
+    for (const auto& observed_file : old_observed_files) {
         if (!new_observed_files.count(observed_file.first)) {
             result.insert({observed_file.first, Content::Status::DELETED});
         }
@@ -31,7 +32,7 @@ Content file_util::read_dir_one_depth(const std::string& directory) {
     struct dirent* ent;
     ChangeMap files;
     std::vector<std::string> directories;
-    struct stat file_stats{};
+    struct stat file_stats {};
 
     LOG::logger.println(Logger::Level::TRACE, "Reading directory: " + directory);
     if ((dir = opendir(directory.c_str())) != nullptr) {
@@ -45,8 +46,9 @@ Content file_util::read_dir_one_depth(const std::string& directory) {
             std::string full_path = directory + "/" + filename; // NOLINT(performance-inefficient-string-concatenation)
             long& last_modification_time = file_stats.st_mtimespec.tv_nsec;
             if (stat(full_path.c_str(), &file_stats) == 0) {
-                LOG::logger.println(Logger::Level::TRACE,
-                                    "File modification date: " + std::to_string(last_modification_time));
+                LOG::logger.println(
+                    Logger::Level::TRACE,
+                    "File modification date: " + std::to_string(last_modification_time));
             } else {
                 LOG::logger.println(Logger::Level::INFO, "stat() failed for this file " + filename);
             }
@@ -95,7 +97,7 @@ ChangeMap file_util::read_dir_async(const std::string& directory) {
         dirs.pop_back();
     }
     LOG::logger.println(Logger::Level::DEBUG, "Created workers: " + std::to_string(workers.size()));
-    for (auto& worker: workers) {
+    for (auto& worker : workers) {
         auto thread_result = worker.get();
         result.insert(thread_result.begin(), thread_result.end());
     }

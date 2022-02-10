@@ -3,7 +3,9 @@ Language: Cpp
 BasedOnStyle: LLVM
 AllowAllConstructorInitializersOnNextLine: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 0
 IndentWidth: 4
+AccessModifierOffset: -4 # minus indent width
 MaxEmptyLinesToKeep: 2
 BreakBeforeBraces: Attach
 Cpp11BracedListStyle: true
@@ -11,17 +13,20 @@ SpaceBeforeCpp11BracedList: false
 IncludeBlocks: Regroup
 AllowShortFunctionsOnASingleLine: Empty
 AllowAllParametersOfDeclarationOnNextLine: false
+PenaltyReturnTypeOnItsOwnLine: 100
 BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
 BinPackArguments: false
 PointerAlignment: Left
-AlignAfterOpenBracket: AlwaysBreak
+AlignAfterOpenBracket: AlwaysBreak # from next release will have `BlockIndent` option
 AllowShortLoopsOnASingleLine: false
-BreakConstructorInitializers: BeforeComma # me prefer BeforeColon
-BreakInheritanceList: BeforeComma # me prefer BeforeColon
-ColumnLimit: 120 # nicer with 80
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+ColumnLimit: 120
+PenaltyBreakAssignment: 300
 SpaceBeforeCtorInitializerColon: false
 AllowShortEnumsOnASingleLine: false
 NamespaceIndentation: All
 FixNamespaceComments: false
+IndentCaseLabels: true
 ...

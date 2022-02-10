@@ -3,18 +3,19 @@
 
 #include <iostream>
 #include <thread>
+using std::unordered_map;
 
 // TODO: this sucks
 std::string get_string_from_enum1(Content::Status status) {
     switch (status) {
-    case Content::Status::CREATED:
-        return "Created";
-    case Content::Status::DELETED:
-        return "Deleted";
-    case Content::Status::MODIFIED:
-        return "Modified";
-    default:
-        throw std::runtime_error("Status value is not implemented");
+        case Content::Status::CREATED:
+            return "Created";
+        case Content::Status::DELETED:
+            return "Deleted";
+        case Content::Status::MODIFIED:
+            return "Modified";
+        default:
+            throw std::runtime_error("Status value is not implemented");
     }
 }
 
